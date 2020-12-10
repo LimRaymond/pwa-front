@@ -19,16 +19,13 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 function sendSubscription(subscription) {
-  return fetch(
-    `https://epi-pwa-server.herokuapp.com//notifications/subscribe`,
-    {
-      method: 'POST',
-      body: JSON.stringify(subscription),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  return fetch(`https://epi-pwa-server.herokuapp.com/notifications/subscribe`, {
+    method: 'POST',
+    body: JSON.stringify(subscription),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+  });
 }
 
 export function subscribeUser() {
