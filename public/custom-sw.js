@@ -1,5 +1,5 @@
 self.addEventListener('push', (event) => {
-  const data = event.data.json();
+  const data = event.data.JSON();
   const { title } = data;
   const body = {
     body: data.body,
