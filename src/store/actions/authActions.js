@@ -13,7 +13,7 @@ import {
 } from '../types/authTypes';
 
 export const loginAction = (user) => (dispatch) => {
-  const promise = axios.post('https://unptitfive-server.herokuapp.com/user/login', {
+  const promise = axios.post('https://epi-pwa-server.herokuapp.com/user/login', {
     ...user,
   }, {
     withCredentials: true,
@@ -37,7 +37,7 @@ export const loginAction = (user) => (dispatch) => {
 };
 
 export const registerAction = (user) => (dispatch) => {
-  const promise = axios.post('https://unptitfive-server.herokuapp.com/user/register', {
+  const promise = axios.post('https://epi-pwa-server.herokuapp.com/user/register', {
     ...user,
   });
   promise.then(
@@ -62,7 +62,7 @@ export const getCurrentUserAction = () => (dispatch) => {
       Authorization: `Bearer ${Cookies.get('token')}`,
     },
   };
-  const promise = axios.get('https://unptitfive-server.herokuapp.com/user/profile', config);
+  const promise = axios.get('https://epi-pwa-server.herokuapp.com/user/profile', config);
   promise.then(
     (res) => {
       dispatch({
