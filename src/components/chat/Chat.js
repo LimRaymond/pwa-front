@@ -23,9 +23,34 @@ const Chat = () => {
   const [messages, setMessages] = useState('');
   const [input, setInput] = useState('');
   const [socket, setSocket] = useState({});
+  const [location, setLocation] = useState('Inconnu');
   const dispatch = useDispatch();
   const history = useHistory();
   const ThemeSwitcher = useDarkMode();
+
+  function getLocation() {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      console.log("Geo Location not supported by browser");
+    }
+  }
+  
+  function showPosition(position) {
+    var location = {
+      longitude: position.coords.longitude,
+      latitude: position.coords.latitude
+    }
+
+    const promise = axios.get(`https://api-adresse.data.gouv.fr/reverse/?lon=${location.longitude}&lat=${location.latitude}`);
+    promise.then(
+      (res) => {
+        if (res.data) {
+          setLocation(res.data.features[0].properties.city)
+        }
+      }
+    )
+  }
 
   const chooseChannel = (s, name) => {
     setMessages('');
@@ -63,6 +88,9 @@ const Chat = () => {
   });
 
   useEffect(() => {
+
+    getLocation();
+
     const config = {
       headers: {
         Authorization: `Bearer ${Cookies.get('token')}`,
@@ -148,6 +176,7 @@ const Chat = () => {
             </li>
           ))}
         </ul>
+        <div className="locationText">Votre position: {location}</div>
         <div className="theme-switcher">{ThemeSwitcher}</div>
         <div className="logout" onClick={() => disconnectUser()}>{translate('LOGOUT', navigator.languages)}</div>
       </div>
