@@ -16,6 +16,7 @@ import './Chat.css';
 import translate from '../../translations/translate';
 import { unsetUserAction } from '../../store/actions/authActions';
 import useDarkMode from '../../hooks/useDarkMode';
+import { subscribeUser } from './../../subscription';
 
 const Chat = () => {
   const [channels, setChannels] = useState([]);
@@ -60,24 +61,25 @@ const Chat = () => {
         Authorization: `Bearer ${Cookies.get('token')}`,
       },
     };
-    const promise = axios.get(`https://unptitfive-server.herokuapp.com/message/${name}`, config);
-    promise.then(
-      (res) => {
-        if (res.data) {
-          const str = res.data.map((e) => (
-            <div className="message">
-              <div>
-                <b>{e.user.username}</b> : {e.message}
-              </div>
-            </div>
-          ));
-          setMessages((message) => [...message, str]);
-          window.scrollTo(0, document.body.scrollHeight);
-        }
-        setCurrentChannel(name);
-        s.emit('join', name);
-      },
+    const promise = axios.get(
+      `https://unptitfive-server.herokuapp.com/message/${name}`,
+      config,
     );
+    promise.then((res) => {
+      if (res.data) {
+        const str = res.data.map((e) => (
+          <div className="message">
+            <div>
+              <b>{e.user.username}</b> : {e.message}
+            </div>
+          </div>
+        ));
+        setMessages((message) => [...message, str]);
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+      setCurrentChannel(name);
+      s.emit('join', name);
+    });
   };
 
   const s = io('https://unptitfive-server.herokuapp.com/', {
@@ -96,15 +98,16 @@ const Chat = () => {
         Authorization: `Bearer ${Cookies.get('token')}`,
       },
     };
-    const promise = axios.get('https://unptitfive-server.herokuapp.com/channel', config);
-    promise.then(
-      (res) => {
-        setChannels(res.data);
-        if (res.data) {
-          chooseChannel(s, res.data[0].name);
-        }
-      },
+    const promise = axios.get(
+      'https://unptitfive-server.herokuapp.com/channel',
+      config,
     );
+    promise.then((res) => {
+      setChannels(res.data);
+      if (res.data) {
+        chooseChannel(s, res.data[0].name);
+      }
+    });
 
     setSocket(s);
 
@@ -113,9 +116,16 @@ const Chat = () => {
         color: data.color,
         fontStyle: 'italic',
       };
-      const msg = <div className="info" style={divStyle}><b>{data.message}</b></div>;
+      const msg = (
+        <div className="info" style={divStyle}>
+          <b>{data.message}</b>
+        </div>
+      );
       let scrollAtBottom = false;
-      if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+      if (
+        window.innerHeight + window.pageYOffset >=
+        document.body.offsetHeight
+      ) {
         scrollAtBottom = true;
       }
       setMessages((message) => [...message, msg]);
@@ -133,10 +143,14 @@ const Chat = () => {
         </div>
       );
       let scrollAtBottom = false;
-      if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+      if (
+        window.innerHeight + window.pageYOffset >=
+        document.body.offsetHeight
+      ) {
         scrollAtBottom = true;
       }
       setMessages((message) => [...message, msg]);
+      subscribeUser();
       if (scrollAtBottom) {
         window.scrollTo(0, document.body.scrollHeight);
       }
@@ -166,11 +180,17 @@ const Chat = () => {
       <div className="channel-left">
         <div className="title">{translate('CHANNEL', navigator.languages)}</div>
         <ul className="channel-list">
-          {channels.map((elem, index) => ( // eslint-disable-line
+          {channels.map((
+            elem,
+            index, // eslint-disable-line
+          ) => (
             <li
-              className={(elem.name === currentChannel) ? 'current-channel' : ''}
-              onClick={() => (elem.name !== currentChannel) ? chooseChannel(socket, elem.name)
-                : null}
+              className={elem.name === currentChannel ? 'current-channel' : ''}
+              onClick={() =>
+                elem.name !== currentChannel
+                  ? chooseChannel(socket, elem.name)
+                  : null
+              }
             >
               {elem.name}
             </li>
@@ -178,12 +198,12 @@ const Chat = () => {
         </ul>
         <div className="locationText">Votre position: {location}</div>
         <div className="theme-switcher">{ThemeSwitcher}</div>
-        <div className="logout" onClick={() => disconnectUser()}>{translate('LOGOUT', navigator.languages)}</div>
+        <div className="logout" onClick={() => disconnectUser()}>
+          {translate('LOGOUT', navigator.languages)}
+        </div>
       </div>
       <div className="chat-area">
-        <div className="message-container">
-          {messages}
-        </div>
+        <div className="message-container">{messages}</div>
         <form onSubmit={onSubmit}>
           <input
             className="input-message"
